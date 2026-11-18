@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ROR Wonder Progress</title>
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f4f6fb;--panel:#ffffff;--ink:#16203a;--mute:#66708a;--line:#dfe4ef;--track:#e6eaf4;
+  --a:#0fa3a3;--b:#f2b632;--sel:#eaf6f6;--glow:rgba(242,182,50,.55);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1424;--panel:#161d33;--ink:#eef1fa;--mute:#98a2c0;--line:#27304d;--track:#222b47;
+    --a:#2ed0c8;--b:#ffcf5c;--sel:#1c2a40;--glow:rgba(255,207,92,.5);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1424;--panel:#161d33;--ink:#eef1fa;--mute:#98a2c0;--line:#27304d;--track:#222b47;
+  --a:#2ed0c8;--b:#ffcf5c;--sel:#1c2a40;--glow:rgba(255,207,92,.5);color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Outfit","Segoe UI",system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.01em}
+header p{margin:2px 0 0;color:var(--mute);font-size:.9rem}
+#theme{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:8px;max-height:640px;overflow-y:auto}
+.item{display:block;width:100%;text-align:left;border:0;background:transparent;color:inherit;font:inherit;padding:10px 12px;border-radius:12px;cursor:pointer;position:relative}
+.item:hover{background:var(--sel)}
+.item[aria-pressed="true"]{background:var(--sel);box-shadow:inset 3px 0 0 var(--a)}
+.item:focus-visible,#theme:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.item .n{font-weight:600;font-size:.92rem;display:flex;justify-content:space-between;gap:8px}
+.item .n span{color:var(--mute);font-weight:500}
+.item .c{font-size:.78rem;color:var(--mute);margin-bottom:6px}
+.mini{height:5px;border-radius:9px;background:var(--track);overflow:hidden}
+.mini i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--b));border-radius:9px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:30px 28px;overflow:hidden}
+.who{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.who h2{margin:0;font-size:1.35rem;letter-spacing:-.01em}
+.tag{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:999px;background:var(--sel);color:var(--a);font-size:.82rem;font-weight:600}
+.big{font-size:clamp(3.4rem,11vw,5.6rem);font-weight:800;line-height:1;letter-spacing:-.03em;text-align:right}
+.big small{font-size:.4em;font-weight:600;color:var(--mute)}
+.bar{position:relative;margin:34px 0 10px;height:34px;border-radius:999px;background:var(--track);box-shadow:inset 0 2px 6px rgba(0,0,0,.12)}
+.fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:linear-gradient(90deg,var(--a),var(--b));overflow:hidden;transition:width 1.6s cubic-bezier(.22,1,.36,1)}
+.fill::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);transform:translateX(-100%);animation:shine 2.6s ease-in-out 1.4s infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.knob{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#fff;border:4px solid var(--b);box-shadow:0 0 0 6px var(--glow);transition:left 1.6s cubic-bezier(.22,1,.36,1);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 12px transparent}}
+.ticks{position:relative;height:20px;font-size:.75rem;color:var(--mute)}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}.ticks span:last-child{transform:translateX(-100%)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:.82rem}
+.msg{margin:22px 0 0;color:var(--mute);line-height:1.55}
+@media (max-width:760px){
+  .grid{grid-template-columns:1fr}
+  .list{max-height:260px}
+  .big{text-align:left}
+  .card{padding:22px 18px}
+  .stats{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .fill,.knob{transition:none}.fill::after,.knob{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>ROR Wonder Progress</h1>
+      <p>Select a name to see their progress. <span id="live">Connecting to the sheet…</span></p>
+    </div>
+    <button id="theme" type="button" aria-label="Switch light or dark mode">Switch theme</button>
+  </header>
+  <div class="grid">
+    <div class="list" id="list" role="group" aria-label="Members"></div>
+    <section class="card" aria-live="polite">
+      <div class="who">
+        <div><h2 id="nm"></h2><span class="tag" id="cell"></span></div>
+        <div class="big"><span id="pct">0</span><small>%</small></div>
+      </div>
+      <div class="bar">
+        <div class="fill" id="fill"></div>
+        <div class="knob" id="knob"></div>
+      </div>
+      <div class="ticks"><span style="left:0">0</span><span style="left:25%">2,375</span><span style="left:50%">4,750</span><span style="left:75%">7,125</span><span style="left:100%">9,500</span></div>
+      <div class="stats">
+        <div class="stat"><b id="cur">0</b><span>Current standing</span></div>
+        <div class="stat"><b id="left">0</b><span id="leftLbl">Still to go</span></div>
+        <div class="stat"><b id="days">0</b><span id="daysLbl">Days left</span></div>
+      </div>
+      <p class="msg" id="msg"></p>
+    </section>
+  </div>
+</div>
+
+<script>
+// Paste your Apps Script Web app URL here (it ends in /exec)
+var API_URL = "https://script.google.com/macros/s/AKfycbwh1qgqDvvzMv23oDYynyp7uBZ6nN_7GhjCTu1ahALaZUAdEXqii6fMyVcyMEtQ3EpQ4g/exec";
+var DATA = [], sel = 0, lastKey = "";
+
+var $ = function(id){return document.getElementById(id)};
+var fmt = function(n){return Math.round(n).toLocaleString("en-US")};
+var list = $("list"), timer = null;
+
+function daysTo(iso){
+  var t = new Date(); t.setHours(0,0,0,0);
+  var p = iso.split("-"), d = new Date(+p[0], +p[1]-1, +p[2]);
+  return Math.round((d - t) / 86400000);
+}
+
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function buildList(){
+  list.innerHTML = "";
+  DATA.forEach(function(r, i){
+    var pc = Math.min(r[3]/r[4]*100, 100);
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "item"; b.setAttribute("aria-pressed", i === sel ? "true" : "false");
+    b.innerHTML = '<div class="n">'+esc(r[0])+'<span>'+pc.toFixed(1)+'%</span></div><div class="c">'+esc(r[1])+'</div><div class="mini"><i style="width:'+pc+'%"></i></div>';
+    b.addEventListener("click", function(){ show(i); });
+    list.appendChild(b);
+  });
+}
+
+function countUp(el, to, ms, dec){
+  var from = 0, t0 = null;
+  function step(t){
+    if(t0 === null) t0 = t;
+    var k = Math.min((t - t0) / ms, 1), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = dec ? (from + (to - from) * e).toFixed(1) : fmt(from + (to - from) * e);
+    if(k < 1) timer = requestAnimationFrame(step);
+  }
+  cancelAnimationFrame(timer);
+  timer = requestAnimationFrame(step);
+}
+
+function show(i){
+  var r = DATA[i], cur = r[3], GOAL = r[4]; sel = i;
+  var pc = Math.min(cur/GOAL*100, 100), left = Math.max(GOAL-cur, 0), d = daysTo(r[2]);
+  [].forEach.call(list.children, function(el, k){ el.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+  $("nm").textContent = r[0];
+  $("cell").textContent = r[1];
+
+  // reset then animate
+  var fill = $("fill"), knob = $("knob");
+  fill.style.transition = knob.style.transition = "none";
+  fill.style.width = "0%"; knob.style.left = "0%";
+  void fill.offsetWidth;
+  fill.style.transition = knob.style.transition = "";
+  requestAnimationFrame(function(){ fill.style.width = pc + "%"; knob.style.left = pc + "%"; });
+
+  countUp($("pct"), pc, 1600, true);
+  $("cur").textContent = fmt(cur) + " / " + fmt(GOAL);
+  $("left").textContent = fmt(left);
+  $("leftLbl").textContent = left === 0 ? "Goal reached" : "Still to go";
+
+  var dayTxt, msg;
+  if(d > 0){ $("days").textContent = d; $("daysLbl").textContent = d === 1 ? "Day left" : "Days left"; }
+  else if(d === 0){ $("days").textContent = "Today"; $("daysLbl").textContent = "Completion date"; }
+  else { $("days").textContent = Math.abs(d); $("daysLbl").textContent = "Days past completion date"; }
+
+  if(left === 0) msg = "Goal reached. Well done!";
+  else if(d > 0) msg = "About " + fmt(Math.ceil(left / d)) + " per day will bring " + r[0].split(" ")[0] + " to the finish line on time.";
+  else if(d === 0) msg = "Today is the completion date. Finish strong!";
+  else msg = "The completion date has passed. It is not too late to keep pressing on.";
+  $("msg").textContent = msg;
+}
+
+$("theme").addEventListener("click", function(){
+  var root = document.documentElement;
+  var dark = root.getAttribute("data-theme") === "dark" ||
+    (!root.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+});
+
+function onData(rows){
+  var prev = DATA[sel] ? DATA[sel][0] : null;
+  DATA = rows;
+  if(!DATA.length){ $("nm").textContent = "No data found in the sheet"; return; }
+  var idx = DATA.findIndex(function(r){ return r[0] === prev; });
+  if(idx < 0) idx = 0;
+  sel = idx; buildList();
+  var r = DATA[idx], key = r.join("|");
+  if(key !== lastKey){ lastKey = key; show(idx); }
+  $("live").textContent = "Live · updated " + new Date().toLocaleTimeString();
+}
+function load(){
+  fetch(API_URL + "?format=json", {cache: "no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(onData)
+    .catch(function(e){ $("live").textContent = "Could not reach the sheet. Retrying..."; });
+}
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>
